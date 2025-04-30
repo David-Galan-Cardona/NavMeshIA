@@ -13,7 +13,7 @@ public class Player : HPInterface
     public int speed = 10;
     public int baseSpeed = 10;
     public bool isGrounded = false;
-    public int ySpeed;
+    public float ySpeed;
     public bool hasGun = false;
     public GameObject gun;
     public CameraSwitch cameraSwitch;
@@ -28,26 +28,12 @@ public class Player : HPInterface
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
-    }
-    private void OnTriggerEnter(Collider collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-            ySpeed = 0;
-        }
-    }
-    private void OnTriggerExit(Collider collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = false;
-        }
+        controller = GetComponent<CharacterController>();
     }
     void Update()
     {
+        isGrounded = controller.isGrounded;
         animator.SetBool("Jump", false);
-        controller = GetComponent<CharacterController>();
 
         // mueve al jugador sin utilizar moveposition y que cambie segun su rotacion
         float horizontal = Input.GetAxis("Horizontal");
@@ -98,17 +84,19 @@ public class Player : HPInterface
         if (!isGrounded)
         {
             //no va
-            Vector3 move = new Vector3(horizontal, -0.98f+ySpeed, vertical);
+
+            ySpeed -= 9.8f * Time.deltaTime;
+            Vector3 move = new Vector3(horizontal * speed, ySpeed, vertical * speed);
             //mueve segun la rotacion del jugador
             move = transform.TransformDirection(move);
-            controller.Move(move * speed * Time.deltaTime);
+            controller.Move(move * Time.deltaTime);
         }
         else
         {
-            Vector3 move = new Vector3(horizontal, ySpeed, vertical);
+            Vector3 move = new Vector3(horizontal * speed, ySpeed, vertical * speed);
             //mueve segun la rotacion del jugador
             move = transform.TransformDirection(move);
-            controller.Move(move * speed * Time.deltaTime);
+            controller.Move(move * Time.deltaTime);
         }
     }
 }
