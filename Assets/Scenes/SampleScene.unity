@@ -3310,7 +3310,7 @@ GameObject:
   - component: {fileID: 1757438159}
   m_Layer: 0
   m_Name: GameObject
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3375,7 +3375,7 @@ MonoBehaviour:
   ySpeed: 0
   hasGun: 0
   gun: {fileID: 504306157}
-  cameraSwitch: {fileID: 647653674}
+  cameraSwitch: {fileID: 1757438162}
   FPCameraOffset: 0.3
 --- !u!114 &1757438162
 MonoBehaviour:
@@ -3394,7 +3394,7 @@ MonoBehaviour:
   thirdPersonCamera: {fileID: 1867333851}
   FPGun: {fileID: 1851708845}
   hasGun: 0
-  player: {fileID: 647653669}
+  player: {fileID: 1757438161}
 --- !u!136 &1757438163
 CapsuleCollider:
   m_ObjectHideFlags: 0

@@ -33,10 +33,12 @@ public class Player : HPInterface
     void Update()
     {
         isGrounded = controller.isGrounded;
-        animator.SetBool("Jump", false);
-
-        // mueve al jugador sin utilizar moveposition y que cambie segun su rotacion
-        float horizontal = Input.GetAxis("Horizontal");
+        if (isGrounded)
+        {
+            animator.SetBool("Jump", false);
+        }
+            // mueve al jugador sin utilizar moveposition y que cambie segun su rotacion
+            float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
         //Vector3 move = transform.right * horizontal + transform.forward * vertical;
         /*_rb.velocity = new Vector3(move.x * speed, _rb.velocity.y, move.z * speed);*/
