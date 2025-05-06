@@ -10,6 +10,7 @@ public class EnemyController : HPInterface
     public GameObject target;
     public bool OnRange = false, OnAttackRange = false;
     public ChaseBehaviour _chaseB;
+    public Animator animator;
     public StateSO currentNode;
     public List<StateSO> Nodes;
     public GameObject PatrolA;
@@ -23,6 +24,7 @@ public class EnemyController : HPInterface
         MaxHP = 10;
         HP = MaxHP;
         _chaseB = GetComponent<ChaseBehaviour>();
+        animator.SetBool("Walking", true);
     }
     private void OnTriggerEnter(Collider collision)
     {

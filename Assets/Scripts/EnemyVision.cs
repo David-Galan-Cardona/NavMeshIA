@@ -45,9 +45,9 @@ public class EnemyVision : MonoBehaviour
                 RaycastHit hit;
                 if (Physics.Raycast(transform.position, directionToPlayer.normalized, out hit, visionRange, ~obstacleLayer))
                 {
-
-                    if (hit.transform == player)
+                    if (hit.transform.name == "Player")
                     {
+                        Debug.Log("Raycast hit: " + hit.transform.name);
 
                         if (CoroutineStopFollowing != null)
                         {

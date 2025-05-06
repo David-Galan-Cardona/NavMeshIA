@@ -7,6 +7,7 @@ public class CameraSwitch : MonoBehaviour
     public GameObject globalCamera;
     public GameObject firstPersonCamera;
     public GameObject thirdPersonCamera;
+    public GameObject secondPersonCamera;
     public GameObject FPGun;
     public bool hasGun = false;
     public Player player;
@@ -14,21 +15,21 @@ public class CameraSwitch : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButton(1) && player.isGrounded)
+        if (Input.GetMouseButton(1) && player.isGrounded && !secondPersonCamera.activeSelf)
         {
             globalCamera.SetActive(false);
             firstPersonCamera.SetActive(true);
             thirdPersonCamera.SetActive(false);
             StartCoroutine(ActivateGun());
         }
-        if (Input.GetMouseButtonUp(1))
+        if (Input.GetMouseButtonUp(1) && !secondPersonCamera.activeSelf)
         {
             globalCamera.SetActive(false);
             firstPersonCamera.SetActive(false);
             thirdPersonCamera.SetActive(true);
             FPGun.SetActive(false);
         }
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Q) && !secondPersonCamera.activeSelf)
         {
             globalCamera.SetActive(!globalCamera.activeSelf);
             firstPersonCamera.SetActive(false);

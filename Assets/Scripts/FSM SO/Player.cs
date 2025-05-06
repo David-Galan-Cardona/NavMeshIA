@@ -8,13 +8,13 @@ using Unity.VisualScripting;
 
 public class Player : HPInterface
 {
-    private Rigidbody _rb;
     public Animator animator;
     public int speed = 10;
     public int baseSpeed = 10;
     public bool isGrounded = false;
     public float ySpeed;
     public bool hasGun = false;
+    public bool isDancing = false;
     public GameObject gun;
     public CameraSwitch cameraSwitch;
     public float FPCameraOffset = 1f;
@@ -27,7 +27,6 @@ public class Player : HPInterface
 
     private void Awake()
     {
-        _rb = GetComponent<Rigidbody>();
         controller = GetComponent<CharacterController>();
     }
     void Update()
@@ -37,15 +36,9 @@ public class Player : HPInterface
         {
             animator.SetBool("Jump", false);
         }
-            // mueve al jugador sin utilizar moveposition y que cambie segun su rotacion
-            float horizontal = Input.GetAxis("Horizontal");
+        float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
-        //Vector3 move = transform.right * horizontal + transform.forward * vertical;
-        /*_rb.velocity = new Vector3(move.x * speed, _rb.velocity.y, move.z * speed);*/
-        
-
-        //mira si se esta moviendo
-        if (horizontal != 0 || vertical != 0)
+        if (horizontal != 0 || vertical != 0 && !isDancing)
         {
             animator.SetBool("Walking", true);
         }
@@ -53,7 +46,15 @@ public class Player : HPInterface
         {
             animator.SetBool("Walking", false);
         }
-        if (Input.GetKey(KeyCode.LeftControl) && speed==baseSpeed)
+        if (Input.GetKey(KeyCode.C) && !cameraSwitch.firstPersonCamera.activeSelf && isGrounded && speed != speed/2 && !isDancing)
+        {
+            isDancing = true;
+            speed = baseSpeed;
+            animator.SetBool("Dancing", true);
+            //llama a una corrutina para que el jugador deje de bailar cuando la animacion termine
+            //StartCoroutine(StopDancing());
+        }
+        if (Input.GetKey(KeyCode.LeftControl) && speed==baseSpeed && !isDancing)
         {
             speed = baseSpeed*2;
             animator.SetBool("Run", true);
@@ -63,7 +64,7 @@ public class Player : HPInterface
             speed = baseSpeed;
             animator.SetBool("Run", false);
         }
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !isDancing)
         {
             speed = baseSpeed / 2;
             animator.SetBool("Crouch", true);
@@ -75,7 +76,7 @@ public class Player : HPInterface
             animator.SetBool("Crouch", false);
             cameraSwitch.firstPersonCamera.GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<Cinemachine3rdPersonFollow>().ShoulderOffset += new Vector3(0, FPCameraOffset, 0);
         }
-        if (Input.GetKeyDown(KeyCode.Space) && (speed==baseSpeed || speed==baseSpeed*2) && !cameraSwitch.firstPersonCamera.activeSelf)
+        if (Input.GetKeyDown(KeyCode.Space) && (speed==baseSpeed || speed==baseSpeed*2) && !cameraSwitch.firstPersonCamera.activeSelf && !isDancing)
         {
             if (isGrounded)
             {
@@ -85,15 +86,13 @@ public class Player : HPInterface
         }
         if (!isGrounded)
         {
-            //no va
-
             ySpeed -= 9.8f * Time.deltaTime;
             Vector3 move = new Vector3(horizontal * speed, ySpeed, vertical * speed);
             //mueve segun la rotacion del jugador
             move = transform.TransformDirection(move);
             controller.Move(move * Time.deltaTime);
         }
-        else
+        else if (!isDancing)
         {
             Vector3 move = new Vector3(horizontal * speed, ySpeed, vertical * speed);
             //mueve segun la rotacion del jugador
@@ -101,4 +100,11 @@ public class Player : HPInterface
             controller.Move(move * Time.deltaTime);
         }
     }
+    /*private IEnumerator StopDancing()
+    {
+        // Espera a que la animación de baile termine
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+        animator.SetBool("Dancing", false);
+        isDancing = false;
+    }*/
 }

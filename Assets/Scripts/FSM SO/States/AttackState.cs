@@ -6,10 +6,14 @@ public class AttackState : StateSO
 {
     public override void OnStateEnter(EnemyController ec)
     {
+        ec.animator.SetTrigger("Attack");
+        ec.GetComponent<ChaseBehaviour>().StopChasing();
     }
 
     public override void OnStateExit(EnemyController ec)
     {
+        ec.GetComponent<ChaseBehaviour>().Chase(ec.target.transform);
+        ec.animator.SetBool("Attack", false);
     }
 
     public override void OnStateUpdate(EnemyController ec)

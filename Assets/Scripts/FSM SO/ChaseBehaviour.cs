@@ -6,12 +6,7 @@ using UnityEngine.AI;
 public class ChaseBehaviour : MonoBehaviour
 {
     public float Speed;
-    private Rigidbody2D _rb;
     public NavMeshAgent agent;
-    private void Awake()
-    {
-        _rb = GetComponent<Rigidbody2D>();
-    }
     public void Chase(Transform target)
     {
         //        _rb.velocity = (target.position - self.position).normalized * Speed;
@@ -19,6 +14,7 @@ public class ChaseBehaviour : MonoBehaviour
         //busca el componente EnemyVision y si playerInSight es true
         if (gameObject.GetComponent<EnemyVision>().playerInSight == true)
         {
+            gameObject.GetComponent<EnemyController>().animator.SetBool("Chase", true);
             agent.SetDestination(target.position);
         }
     }
@@ -32,9 +28,6 @@ public class ChaseBehaviour : MonoBehaviour
     public void StopChasing()
     {
         agent.SetDestination(transform.position);
-    }
-    public void PetChase(Transform target)
-    {
-        agent.SetDestination(target.position);
+        gameObject.GetComponent<EnemyController>().animator.SetBool("Chase", false);
     }
 }
