@@ -5,9 +5,12 @@ using Cinemachine;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using Unity.VisualScripting;
+using UnityEngine.InputSystem;
+using static UnityEditor.Timeline.TimelinePlaybackControls;
 
-public class Player : HPInterface
+public class Player : HPInterface, PlayerControls.IPlayerActions
 {
+    private PlayerControls playerControls;
     public Animator animator;
     public int speed = 10;
     public int baseSpeed = 10;
@@ -20,6 +23,70 @@ public class Player : HPInterface
     public float FPCameraOffset = 1f;
     CharacterController controller;
 
+    public void OnEnable()
+    {
+        if (playerControls == null)
+        {
+            playerControls = new PlayerControls();
+            playerControls.Player.SetCallbacks(this);
+        }
+        playerControls.Enable();
+    }
+    public void OnDisable()
+    {
+        playerControls.Disable();
+    }
+    public void OnCrouch(InputAction.CallbackContext context)
+    {
+        if (context.performed && !isDancing)
+        {
+            speed = baseSpeed / 2;
+            animator.SetBool("Crouch", true);
+            cameraSwitch.firstPersonCamera.GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<Cinemachine3rdPersonFollow>().ShoulderOffset += new Vector3(0, -FPCameraOffset, 0);
+        }
+        else if (context.canceled)
+        {
+            speed = baseSpeed;
+            animator.SetBool("Crouch", false);
+            cameraSwitch.firstPersonCamera.GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<Cinemachine3rdPersonFollow>().ShoulderOffset += new Vector3(0, FPCameraOffset, 0);
+        }
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (context.performed && (speed == baseSpeed || speed == baseSpeed * 2) && !cameraSwitch.firstPersonCamera.activeSelf && !isDancing)
+        {
+            if (isGrounded)
+            {
+                ySpeed = 5;
+            }
+        }
+    }
+
+    public void OnRun(InputAction.CallbackContext context)
+    {
+        if (context.performed && speed == baseSpeed && !isDancing)
+        {
+            speed = baseSpeed * 2;
+            animator.SetBool("Run", true);
+        }
+        else if (context.canceled || cameraSwitch.firstPersonCamera.activeSelf)
+        {
+            speed = baseSpeed;
+            animator.SetBool("Run", false);
+        }
+    }
+
+    public void OnDance(InputAction.CallbackContext context)
+    {
+        if (context.performed && !cameraSwitch.firstPersonCamera.activeSelf && isGrounded && speed != speed / 2 && !isDancing)
+        {
+            speed = baseSpeed / 2;
+            animator.SetBool("Crouch", true);
+            cameraSwitch.firstPersonCamera.GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<Cinemachine3rdPersonFollow>().ShoulderOffset += new Vector3(0, -FPCameraOffset, 0);
+        }
+    }
+
     public override void TakeDamage(int damage)
     {
         HP -= damage;
@@ -31,10 +98,19 @@ public class Player : HPInterface
     }
     void Update()
     {
+        if (cameraSwitch.firstPersonCamera.activeSelf)
+        {
+            speed = baseSpeed;
+            animator.SetBool("Run", false);
+        }
         isGrounded = controller.isGrounded;
         if (isGrounded)
         {
             animator.SetBool("Jump", false);
+        }
+        else
+        {
+            animator.SetBool("Jump", true);
         }
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
@@ -46,44 +122,8 @@ public class Player : HPInterface
         {
             animator.SetBool("Walking", false);
         }
-        if (Input.GetKey(KeyCode.C) && !cameraSwitch.firstPersonCamera.activeSelf && isGrounded && speed != speed/2 && !isDancing)
-        {
-            isDancing = true;
-            speed = baseSpeed;
-            animator.SetBool("Dancing", true);
-            //llama a una corrutina para que el jugador deje de bailar cuando la animacion termine
-            //StartCoroutine(StopDancing());
-        }
-        if (Input.GetKey(KeyCode.LeftControl) && speed==baseSpeed && !isDancing)
-        {
-            speed = baseSpeed*2;
-            animator.SetBool("Run", true);
-        }
-        if (Input.GetKeyUp(KeyCode.LeftControl) || cameraSwitch.firstPersonCamera.activeSelf)
-        {
-            speed = baseSpeed;
-            animator.SetBool("Run", false);
-        }
-        if (Input.GetKeyDown(KeyCode.LeftShift) && !isDancing)
-        {
-            speed = baseSpeed / 2;
-            animator.SetBool("Crouch", true);
-            cameraSwitch.firstPersonCamera.GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<Cinemachine3rdPersonFollow>().ShoulderOffset += new Vector3(0, -FPCameraOffset, 0);
-        }
-        if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            speed = baseSpeed;
-            animator.SetBool("Crouch", false);
-            cameraSwitch.firstPersonCamera.GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<Cinemachine3rdPersonFollow>().ShoulderOffset += new Vector3(0, FPCameraOffset, 0);
-        }
-        if (Input.GetKeyDown(KeyCode.Space) && (speed==baseSpeed || speed==baseSpeed*2) && !cameraSwitch.firstPersonCamera.activeSelf && !isDancing)
-        {
-            if (isGrounded)
-            {
-                animator.SetTrigger("Jump");
-                ySpeed = 5;
-            }
-        }
+        
+        
         if (!isGrounded)
         {
             ySpeed -= 9.8f * Time.deltaTime;
