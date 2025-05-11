@@ -15,5 +15,12 @@ public class PatrolPointController : MonoBehaviour
         {
             enemyController.CurrentNodeObject = enemyController.PatrolA;
         }
+
+        if (collision.gameObject.CompareTag("Bullet"))
+        {
+            enemyController.TakeDamage(1);
+            Pool.Instance.Return(collision.gameObject);
+
+        }
     }
 }
